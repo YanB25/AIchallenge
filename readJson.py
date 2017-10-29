@@ -39,7 +39,6 @@ def photo_address(addr, num_of_photo = 1000):
     return address, label
 photo_address.ls = [i for i in range(TotalNumber)]
 photo_address.data = None
-photo_address.big_batch = BigBatch
 photo_address.cur_index = 0
 
 if __name__ == "__main__":

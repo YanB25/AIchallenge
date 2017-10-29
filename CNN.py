@@ -18,6 +18,7 @@ import tempfile
 from tensorflow.examples.tutorials.mnist import input_data
 
 import tensorflow as tf
+from config import *
 
 FLAGS = None
 
@@ -109,9 +110,7 @@ def bias_variable(shape):
 
 
 def main(_):
-  # Import data
-  mnist = input_data.read_data_sets(FLAGS.data_dir, one_hot=True)
-
+  debug_print('run')
   # Create the model
   x = tf.placeholder(tf.float32, [None, pic_pixels])
 
@@ -139,18 +138,23 @@ def main(_):
   train_writer = tf.summary.FileWriter(graph_location)
   train_writer.add_graph(tf.get_default_graph())
 
+  debug_print('begin')
   with tf.Session() as sess:
+    print('1')
+    print(tf.global_variables())
     sess.run(tf.global_variables_initializer())
-    for i in range(20000):
-      batch = mnist.train.next_batch(50)
-      if i % 100 == 0:
+    for i in range(epoch):
+      X, Y_ = next_batch('ai_challenger_scene_train_20170904', batch_size)
+      print(X, Y_)
+      if i % 1 == 0:
+        debug_print('step {} begin'.format(str(i)))
         train_accuracy = accuracy.eval(feed_dict={
-            x: batch[0], y_: batch[1], keep_prob: 1.0})
+            x: X, y_: Y_, keep_prob: 1.0})
         print('step %d, training accuracy %g' % (i, train_accuracy))
-      train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+      train_step.run(feed_dict={x: X, y_: Y_, keep_prob: 0.5})
 
-    print('test accuracy %g' % accuracy.eval(feed_dict={
-        x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+    #print('test accuracy %g' % accuracy.eval(feed_dict={
+        #x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
