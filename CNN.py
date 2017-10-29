@@ -26,11 +26,11 @@ def deepnn(x):
   """deepnn builds the graph for a deep net for classifying digits.
 
   Args:
-    x: an input tensor with the dimensions (N_examples, 784), where 784 is the
+    x: an input tensor with the dimensions (N_examples, pic_pixels), where 784 is the
     number of pixels in a standard MNIST image.
 
   Returns:
-    A tuple (y, keep_prob). y is a tensor of shape (N_examples, 10), with values
+    A tuple (y, keep_prob). y is a tensor of shape (N_examples, Categories), with values
     equal to the logits of classifying the digit into one of 10 classes (the
     digits 0-9). keep_prob is a scalar placeholder for the probability of
     dropout.
@@ -39,12 +39,12 @@ def deepnn(x):
   # Last dimension is for "features" - there is only one here, since images are
   # grayscale -- it would be 3 for an RGB image, 4 for RGBA, etc.
   with tf.name_scope('reshape'):
-    x_image = tf.reshape(x, [-1, 28, 28, 1]) # [batch, height, width, channel]
+    x_image = tf.reshape(x, [-1, pic_width, pic_height, Channel]) # [batch, height, width, channel]
 
   # First convolutional layer - maps one grayscale image to 32 feature maps.
   with tf.name_scope('conv1'):
-    W_conv1 = weight_variable([5, 5, 1, 32]) 
-    b_conv1 = bias_variable([32])
+    W_conv1 = weight_variable([conv1_width, conv1_height, Channel, num_of_actmap1]) 
+    b_conv1 = bias_variable([num_of_actmap1])
     h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1) # [..,..,..,..], [height, width, in_channels, out_chanels]
 
   # Pooling layer - downsamples by 2X.
@@ -53,8 +53,8 @@ def deepnn(x):
 
   # Second convolutional layer -- maps 32 feature maps to 64.
   with tf.name_scope('conv2'):
-    W_conv2 = weight_variable([5, 5, 32, 64])
-    b_conv2 = bias_variable([64])
+    W_conv2 = weight_variable([conv2_width, conv2_height, num_of_actmap1, num_of_actmap2])
+    b_conv2 = bias_variable([num_of_actmap2])
     h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
 
   # Second pooling layer.
@@ -64,10 +64,10 @@ def deepnn(x):
   # Fully connected layer 1 -- after 2 round of downsampling, our 28x28 image
   # is down to 7x7x64 feature maps -- maps this to 1024 features.
   with tf.name_scope('fc1'):
-    W_fc1 = weight_variable([7 * 7 * 64, 1024])
-    b_fc1 = bias_variable([1024])
+    W_fc1 = weight_variable([pic_aft_pool_w * pic_aft_pool_h * num_of_actmap2, num_of_feature1])
+    b_fc1 = bias_variable([num_of_feature1])
 
-    h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
+    h_pool2_flat = tf.reshape(h_pool2, [-1, pic_aft_pool_w*pic_aft_pool_h*num_of_actmap2])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
   # Dropout - controls the complexity of the model, prevents co-adaptation of
@@ -78,8 +78,8 @@ def deepnn(x):
 
   # Map the 1024 features to 10 classes, one for each digit
   with tf.name_scope('fc2'):
-    W_fc2 = weight_variable([1024, 10])
-    b_fc2 = bias_variable([10])
+    W_fc2 = weight_variable([num_of_feature1, Categories])
+    b_fc2 = bias_variable([Categories])
 
     y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
   return y_conv, keep_prob
@@ -113,10 +113,10 @@ def main(_):
   mnist = input_data.read_data_sets(FLAGS.data_dir, one_hot=True)
 
   # Create the model
-  x = tf.placeholder(tf.float32, [None, 784])
+  x = tf.placeholder(tf.float32, [None, pic_pixels])
 
   # Define loss and optimizer
-  y_ = tf.placeholder(tf.float32, [None, 10])
+  y_ = tf.placeholder(tf.float32, [None, Categories])
 
   # Build the graph for the deep net
   y_conv, keep_prob = deepnn(x)
