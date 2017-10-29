@@ -39,7 +39,8 @@ photo_address.data = None
 photo_address.big_batch = BigBatch
 photo_address.cur_index = 0
 
-for i in range(200000):
-    if (i % 100 == 0):
-        print('time {}'.format(str(i)))
-        photo_address("ai_challenger_scene_train_20170904")
+if __name__ == "__main__":
+    for i in range(200000):
+        if (i % 100 == 0):
+            print('time {}'.format(str(i)))
+            photo_address("ai_challenger_scene_train_20170904")
