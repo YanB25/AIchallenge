@@ -21,15 +21,16 @@ def photo_address(addr, num_of_photo = 1000):
         address : mat in shape [num_of_photo, 1]
         label : mat in shape [num_of_photo, 1]
     '''
+    if photo_address.data == None or photo_address.cur_index > BigBatch - num_of_photo:
+        random.seed(time.time())
+        random.shuffle(photo_address.ls)
+        debug_print('shuffle tranning data')
+        photo_address.cur_index = 0
     if photo_address.data == None:
         with open(addr + '/scene_train_annotations_20170904.json') as data_file:
             photo_address.data = json.load(data_file)
             debug_print('first time read json, length {}'.format(str(len(photo_address.data))))
-    if photo_address.cur_index > BigBatch - num_of_photo:
-        random.seed(time.time())
-        random.shuffle(photo_address.data)
-        debug_print('shuffle tranning data')
-        photo_address.cur_index = 0
+
     index = photo_address.cur_index
     address = [photo_address.data[photo_address.ls[i]]["image_id"] for i in range(index, num_of_photo + index)]
     label = [photo_address.data[photo_address.ls[i]]["label_id"] for i in range(index, num_of_photo + index)]
