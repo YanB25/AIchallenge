@@ -1,4 +1,5 @@
 from config import *
+import time
 import json
 import random
 from pprint import pprint
@@ -25,6 +26,7 @@ def photo_address(addr, num_of_photo = 1000):
             photo_address.data = json.load(data_file)
             debug_print('first time read json, length {}'.format(str(len(photo_address.data))))
     if photo_address.cur_index > BigBatch - num_of_photo:
+        random.seed(time.time())
         random.shuffle(photo_address.data)
         debug_print('shuffle tranning data')
         photo_address.cur_index = 0
